@@ -94,6 +94,7 @@ import { BranchToolbar } from "./BranchToolbar";
 import { resolveShortcutCommand, shortcutLabelForCommand } from "../keybindings";
 import PlanSidebar from "./PlanSidebar";
 import ThreadTerminalDrawer from "./ThreadTerminalDrawer";
+import { CursorStatusBar } from "./CursorStatusBar";
 import { ChevronDownIcon } from "lucide-react";
 import { cn, randomUUID } from "~/lib/utils";
 import { toastManager } from "./ui/toast";
@@ -3547,6 +3548,13 @@ export default function ChatView(props: ChatViewProps) {
       {expandedImage && (
         <ExpandedImageDialog preview={expandedImage} onClose={closeExpandedImage} />
       )}
+
+      <CursorStatusBar
+        branchLabel={activeThread.branch ?? undefined}
+        cwdLabel={activeProject?.name ?? undefined}
+        terminalOpen={terminalState.terminalOpen}
+        onToggleTerminal={toggleTerminalVisibility}
+      />
     </div>
   );
 }

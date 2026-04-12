@@ -9,13 +9,14 @@ import { scopeThreadRef } from "@t3tools/client-runtime";
 import { memo } from "react";
 import GitActionsControl from "../GitActionsControl";
 import { type DraftId } from "~/composerDraftStore";
-import { DiffIcon, TerminalSquareIcon } from "lucide-react";
+import { DiffIcon, Globe, PanelRightOpen, TerminalSquareIcon } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import ProjectScriptsControl, { type NewProjectScriptInput } from "../ProjectScriptsControl";
 import { Toggle } from "../ui/toggle";
 import { SidebarTrigger } from "../ui/sidebar";
 import { OpenInPicker } from "./OpenInPicker";
+import { useRightPanelStore } from "~/rightPanelStore";
 
 interface ChatHeaderProps {
   activeThreadEnvironmentId: EnvironmentId;
@@ -68,6 +69,10 @@ export const ChatHeader = memo(function ChatHeader({
   onToggleTerminal,
   onToggleDiff,
 }: ChatHeaderProps) {
+  const rightPanelOpen = useRightPanelStore((state) => state.open);
+  const toggleRightPanel = useRightPanelStore((state) => state.toggleOpen);
+  const openRightTab = useRightPanelStore((state) => state.openTab);
+  const setRightPanelOpen = useRightPanelStore((state) => state.setOpen);
   return (
     <div className="@container/header-actions flex min-w-0 flex-1 items-center gap-2">
       <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden sm:gap-3">
@@ -162,6 +167,47 @@ export const ChatHeader = memo(function ChatHeader({
                 ? `Toggle diff panel (${diffToggleShortcutLabel})`
                 : "Toggle diff panel"}
           </TooltipPopup>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Toggle
+                className="shrink-0"
+                pressed={rightPanelOpen}
+                onPressedChange={() => {
+                  if (!rightPanelOpen) {
+                    setRightPanelOpen(true);
+                    openRightTab("browser", { region: "top", activate: true });
+                  } else {
+                    toggleRightPanel();
+                  }
+                }}
+                aria-label="Toggle browser panel"
+                variant="outline"
+                size="xs"
+              >
+                <Globe className="size-3" />
+              </Toggle>
+            }
+          />
+          <TooltipPopup side="bottom">Toggle browser panel</TooltipPopup>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Toggle
+                className="shrink-0"
+                pressed={rightPanelOpen}
+                onPressedChange={toggleRightPanel}
+                aria-label="Toggle right panel"
+                variant="outline"
+                size="xs"
+              >
+                <PanelRightOpen className="size-3" />
+              </Toggle>
+            }
+          />
+          <TooltipPopup side="bottom">Toggle right panel</TooltipPopup>
         </Tooltip>
       </div>
     </div>
