@@ -10,10 +10,12 @@
  * the redesign already owns, no new data fetching.
  */
 
-import { GitBranch, Globe, PanelRightOpen, SquareTerminal } from "lucide-react";
+import { Cloud, GitBranch, Globe, PanelRightOpen, SquareTerminal } from "lucide-react";
 import { memo } from "react";
+import { useNavigate } from "@tanstack/react-router";
 
 import { useRightPanelStore } from "../rightPanelStore";
+import { getWsConnectionUiState, useWsConnectionStatus } from "../rpc/wsConnectionState";
 
 export interface CursorStatusBarProps {
   providerLabel?: string | undefined;
@@ -33,8 +35,42 @@ export const CursorStatusBar = memo(function CursorStatusBar(props: CursorStatus
   const setRightPanelOpen = useRightPanelStore((s) => s.setOpen);
   const openTab = useRightPanelStore((s) => s.openTab);
 
+  const wsStatus = useWsConnectionStatus();
+  const uiState = getWsConnectionUiState(wsStatus);
+  const navigate = useNavigate();
+
+  const connectionDotColor =
+    uiState === "connected"
+      ? "var(--success)"
+      : uiState === "offline" || uiState === "error"
+        ? "var(--destructive)"
+        : "var(--warning)";
+  const connectionLabel =
+    uiState === "connected"
+      ? "Cloud session live"
+      : uiState === "reconnecting"
+        ? `Reconnecting${
+            wsStatus.reconnectAttemptCount > 0 ? ` (${wsStatus.reconnectAttemptCount})` : ""
+          }…`
+        : uiState === "connecting"
+          ? "Connecting…"
+          : uiState === "offline"
+            ? "Offline"
+            : "Disconnected";
+
   return (
     <div className="cursor-statusbar">
+      <span
+        className="inline-flex items-center gap-1.5"
+        title={`WebSocket: ${uiState}${wsStatus.lastError ? ` · ${wsStatus.lastError}` : ""}`}
+      >
+        <span
+          aria-hidden="true"
+          className="inline-block size-1.5 rounded-full"
+          style={{ backgroundColor: connectionDotColor }}
+        />
+        <span>{connectionLabel}</span>
+      </span>
       {branchLabel ? (
         <span className="inline-flex items-center gap-1">
           <GitBranch size={11} />
@@ -50,6 +86,15 @@ export const CursorStatusBar = memo(function CursorStatusBar(props: CursorStatus
             {modelLabel}
           </span>
         ) : null}
+        <button
+          type="button"
+          className="cursor-iconbtn"
+          onClick={() => void navigate({ to: "/settings/connections" })}
+          title="Connect a cloud environment"
+          aria-label="Connect a cloud environment"
+        >
+          <Cloud size={12} />
+        </button>
         <button
           type="button"
           className="cursor-iconbtn"
