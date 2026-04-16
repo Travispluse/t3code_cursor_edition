@@ -27,10 +27,10 @@ const MODE_ARGS = {
     "--ui=tui",
     "--filter=@t3tools/contracts",
     "--filter=@t3tools/web",
-    "--filter=t3",
+    "--filter=t4",
     "--parallel",
   ],
-  "dev:server": ["run", "dev", "--filter=t3"],
+  "dev:server": ["run", "dev", "--filter=t4"],
   "dev:web": ["run", "dev", "--filter=@t3tools/web"],
   "dev:desktop": ["run", "dev", "--filter=@t3tools/desktop", "--filter=@t3tools/web", "--parallel"],
 } as const satisfies Record<string, ReadonlyArray<string>>;
@@ -472,7 +472,7 @@ const devRunnerCli = Command.make("dev-runner", {
     Argument.withDescription("Development mode to run."),
   ),
   t3Home: Flag.string("home-dir").pipe(
-    Flag.withDescription("Base directory for all T3 Code data (equivalent to T3CODE_HOME)."),
+    Flag.withDescription("Base directory for all T4 Code data (equivalent to T3CODE_HOME)."),
     Flag.withFallbackConfig(optionalStringConfig("T3CODE_HOME")),
   ),
   noBrowser: Flag.boolean("no-browser").pipe(

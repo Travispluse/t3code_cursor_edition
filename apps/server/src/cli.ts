@@ -508,7 +508,7 @@ const withProjectCliSessionToken = <A, E, R>(
   Effect.acquireUseRelease(
     authControlPlane.issueSession({
       role: "owner",
-      label: "t3 project cli",
+      label: "t4 project cli",
     }),
     (issued) => run(issued.token),
     (issued) => authControlPlane.revokeSession(issued.sessionId).pipe(Effect.ignore({ log: true })),
@@ -1109,13 +1109,13 @@ const runServerCommand = (
   });
 
 const startCommand = Command.make("start", { ...sharedServerCommandFlags }).pipe(
-  Command.withDescription("Run the T3 Code server."),
+  Command.withDescription("Run the T4 Code server."),
   Command.withHandler((flags) => runServerCommand(flags)),
 );
 
 const serveCommand = Command.make("serve", { ...sharedServerCommandFlags }).pipe(
   Command.withDescription(
-    "Run the T3 Code server without opening a browser and print headless pairing details.",
+    "Run the T4 Code server without opening a browser and print headless pairing details.",
   ),
   Command.withHandler((flags) =>
     runServerCommand(flags, {
@@ -1125,8 +1125,8 @@ const serveCommand = Command.make("serve", { ...sharedServerCommandFlags }).pipe
   ),
 );
 
-export const cli = Command.make("t3", { ...sharedServerCommandFlags }).pipe(
-  Command.withDescription("Run the T3 Code server."),
+export const cli = Command.make("t4", { ...sharedServerCommandFlags }).pipe(
+  Command.withDescription("Run the T4 Code server."),
   Command.withHandler((flags) => runServerCommand(flags)),
   Command.withSubcommands([startCommand, serveCommand, authCommand, projectCommand]),
 );
