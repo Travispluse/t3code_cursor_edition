@@ -34,6 +34,9 @@ export const CursorStatusBar = memo(function CursorStatusBar(props: CursorStatus
   const toggleRightPanel = useRightPanelStore((s) => s.toggleOpen);
   const setRightPanelOpen = useRightPanelStore((s) => s.setOpen);
   const openTab = useRightPanelStore((s) => s.openTab);
+  const isBrowserTabActive = useRightPanelStore(
+    (s) => s.open && (s.top.activeTab === "browser" || s.bottom.activeTab === "browser"),
+  );
 
   const wsStatus = useWsConnectionStatus();
   const uiState = getWsConnectionUiState(wsStatus);
@@ -108,13 +111,13 @@ export const CursorStatusBar = memo(function CursorStatusBar(props: CursorStatus
         <button
           type="button"
           className="cursor-iconbtn"
-          data-active={rightPanelOpen || undefined}
+          data-active={isBrowserTabActive || undefined}
           onClick={() => {
-            if (!rightPanelOpen) {
+            if (!rightPanelOpen || !isBrowserTabActive) {
               setRightPanelOpen(true);
               openTab("browser", { region: "top", activate: true });
             } else {
-              toggleRightPanel();
+              setRightPanelOpen(false);
             }
           }}
           title="Toggle browser panel"

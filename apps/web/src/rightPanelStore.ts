@@ -42,6 +42,7 @@ export interface RightPanelState {
   browserUrl: string;
   browserHistory: string[];
   browserHistoryIndex: number;
+  reloadTick: number;
 }
 
 export interface RightPanelActions {
@@ -86,6 +87,7 @@ const initialState: RightPanelState = {
   browserUrl: DEFAULT_BROWSER_URL,
   browserHistory: [DEFAULT_BROWSER_URL],
   browserHistoryIndex: 0,
+  reloadTick: 0,
 };
 
 function clampWidth(value: number): number {
@@ -228,13 +230,7 @@ export const useRightPanelStore = create<RightPanelState & RightPanelActions>()(
           };
         }),
 
-      reload: () => {
-        // The browser pane listens for reloadTick; bumping the URL (same value)
-        // via a microtask is enough to force the iframe to remount via key.
-        const current = get().browserUrl;
-        set({ browserUrl: "" });
-        queueMicrotask(() => set({ browserUrl: current }));
-      },
+      reload: () => set((s) => ({ reloadTick: s.reloadTick + 1 })),
     }),
     {
       name: "t3code:right-panel:v1",
@@ -242,16 +238,25 @@ export const useRightPanelStore = create<RightPanelState & RightPanelActions>()(
         resolveStorage(typeof window !== "undefined" ? window.localStorage : undefined),
       ),
       version: 1,
-      partialize: (state) => ({
-        width: state.width,
-        splitRatio: state.splitRatio,
-        splitEnabled: state.splitEnabled,
-        top: state.top,
-        bottom: state.bottom,
-        browserUrl: state.browserUrl,
-        browserHistory: state.browserHistory.slice(-20),
-        browserHistoryIndex: Math.min(state.browserHistoryIndex, 19),
-      }),
+      partialize: (state) => {
+        const MAX = 20;
+        const dropped = Math.max(0, state.browserHistory.length - MAX);
+        const history = state.browserHistory.slice(-MAX);
+        const index = Math.max(
+          0,
+          Math.min(state.browserHistoryIndex - dropped, history.length - 1),
+        );
+        return {
+          width: state.width,
+          splitRatio: state.splitRatio,
+          splitEnabled: state.splitEnabled,
+          top: state.top,
+          bottom: state.bottom,
+          browserUrl: state.browserUrl,
+          browserHistory: history,
+          browserHistoryIndex: index,
+        };
+      },
     },
   ),
 );
@@ -259,9 +264,11 @@ export const useRightPanelStore = create<RightPanelState & RightPanelActions>()(
 export function normalizeBrowserUrl(raw: string): string | null {
   const trimmed = raw.trim();
   if (trimmed.length === 0) return null;
+  const SAFE_SCHEMES = new Set(["http:", "https:"]);
   if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) {
     try {
       const url = new URL(trimmed);
+      if (!SAFE_SCHEMES.has(url.protocol)) return null;
       return url.toString();
     } catch {
       return null;

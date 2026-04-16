@@ -36,8 +36,9 @@ export const BrowserPanel = memo(function BrowserPanel({ threadRef }: BrowserPan
   const designEditEnabled = useRightPanelStore((s) => s.designEditEnabled);
   const setDesignEditEnabled = useRightPanelStore((s) => s.setDesignEditEnabled);
 
+  const reloadTick = useRightPanelStore((s) => s.reloadTick);
+
   const [draftUrl, setDraftUrl] = useState(url);
-  const [reloadNonce, setReloadNonce] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   useEffect(() => {
@@ -55,12 +56,7 @@ export const BrowserPanel = memo(function BrowserPanel({ threadRef }: BrowserPan
     [draftUrl, navigate],
   );
 
-  const handleReload = useCallback(() => {
-    reload();
-    setReloadNonce((n) => n + 1);
-  }, [reload]);
-
-  const iframeKey = useMemo(() => `${url}#${reloadNonce}`, [url, reloadNonce]);
+  const iframeKey = useMemo(() => `${url}:${reloadTick}`, [url, reloadTick]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-editor-background">
@@ -90,7 +86,7 @@ export const BrowserPanel = memo(function BrowserPanel({ threadRef }: BrowserPan
         <button
           type="button"
           className="cursor-iconbtn"
-          onClick={handleReload}
+          onClick={reload}
           title="Reload"
           aria-label="Reload"
         >

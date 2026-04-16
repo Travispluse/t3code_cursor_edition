@@ -287,36 +287,26 @@ function RightPanelRegion(props: RightPanelRegionProps) {
           const label = PANE_LABEL[tab];
           const isActive = tab === activeTab;
           return (
-            <button
-              key={tab}
-              type="button"
-              className="cursor-tab"
-              data-active={isActive || undefined}
-              onClick={() => {
-                if (tab === "diffs" && !diffOpen) {
-                  onOpenDiffRoute();
-                }
-                activateTab(regionId, tab);
-              }}
-            >
-              <Icon size={13} strokeWidth={2} />
-              <span>{label}</span>
-              <span
-                role="button"
-                tabIndex={0}
+            <div key={tab} className="cursor-tab" data-active={isActive || undefined}>
+              <button
+                type="button"
+                className="contents"
+                onClick={() => {
+                  if (tab === "diffs" && !diffOpen) {
+                    onOpenDiffRoute();
+                  }
+                  activateTab(regionId, tab);
+                }}
+              >
+                <Icon size={13} strokeWidth={2} />
+                <span>{label}</span>
+              </button>
+              <button
+                type="button"
                 aria-label={`Close ${label}`}
                 className="cursor-iconbtn ml-1"
                 style={{ height: 16, width: 16 }}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  if (tab === "diffs" && diffOpen) {
-                    onCloseDiffRoute();
-                  }
-                  closeTab(tab);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key !== "Enter" && event.key !== " ") return;
-                  event.stopPropagation();
+                onClick={() => {
                   if (tab === "diffs" && diffOpen) {
                     onCloseDiffRoute();
                   }
@@ -324,8 +314,8 @@ function RightPanelRegion(props: RightPanelRegionProps) {
                 }}
               >
                 <XIcon size={11} />
-              </span>
-            </button>
+              </button>
+            </div>
           );
         })}
         <div className="ml-auto flex items-center gap-0.5 pr-1">

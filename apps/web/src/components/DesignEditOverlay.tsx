@@ -154,12 +154,12 @@ export const DesignEditOverlay = memo(function DesignEditOverlay(props: DesignEd
     setErrorMessage(null);
   }, []);
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(() => {
     if (!pinned || prompt.trim().length === 0) return;
     setSubmitState("pending");
     setErrorMessage(null);
     try {
-      await submitDesignEditPrompt({
+      submitDesignEditPrompt({
         threadRef,
         prompt: prompt.trim(),
         selector: pinned.selector,
@@ -170,7 +170,6 @@ export const DesignEditOverlay = memo(function DesignEditOverlay(props: DesignEd
         sameOrigin: pinned.sameOrigin,
       });
       setSubmitState("sent");
-      // Leave the outline briefly then exit design-edit mode.
       setTimeout(() => {
         clearSelection();
         setDesignEditEnabled(false);
@@ -200,6 +199,7 @@ export const DesignEditOverlay = memo(function DesignEditOverlay(props: DesignEd
   useEffect(() => {
     const onDocKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
+      if (event.defaultPrevented) return;
       if (pinned) {
         clearSelection();
       } else {

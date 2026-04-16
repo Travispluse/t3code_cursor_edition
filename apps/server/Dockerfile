@@ -18,17 +18,21 @@
 ############################
 # Stage 1 — build
 ############################
-FROM oven/bun:1.3 AS builder
+FROM node:22-bookworm AS builder
 
 WORKDIR /repo
 
-# OS-level build deps for node-pty + native modules.
+# Install Bun for the workspace build, plus OS-level deps for node-pty.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       python3 \
       build-essential \
       ca-certificates \
+      curl \
+      unzip \
+ && curl -fsSL https://bun.sh/install | bash \
  && rm -rf /var/lib/apt/lists/*
+ENV PATH="/root/.bun/bin:${PATH}"
 
 # Copy workspace manifests first so bun install can be cached.
 COPY package.json bun.lock turbo.json tsconfig.base.json ./

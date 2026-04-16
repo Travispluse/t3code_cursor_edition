@@ -103,9 +103,17 @@ accepts WebSocket traffic and provides a persistent volume will work:
   `Dockerfile Path = apps/server/Dockerfile`, add a Disk mounted at `/data`.
 - **AWS ECS / Fargate:** Build and push the image, run it behind an ALB
   with WebSocket support enabled, mount EFS at `/data`.
-- **A plain VM:** `docker build -f apps/server/Dockerfile -t t3code-server .`
-  then `docker run -d --name t3code -p 3773:3773 -v t3code-data:/data
-t3code-server`. Put Caddy or nginx in front for HTTPS.
+- **A plain VM:**
+
+  ```bash
+  docker build -f apps/server/Dockerfile -t t3code-server .
+  docker run -d --name t3code \
+    -p 3773:3773 \
+    -v t3code-data:/data \
+    t3code-server
+  ```
+
+  Put Caddy or nginx in front for HTTPS.
 
 The two things every host needs to provide:
 

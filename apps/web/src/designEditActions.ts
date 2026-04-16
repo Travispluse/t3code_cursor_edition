@@ -29,11 +29,17 @@ export interface DesignEditSubmission {
 
 const DESIGN_EDIT_PROMPT_HEADER = "<!-- design-edit context -->";
 
-export async function submitDesignEditPrompt(submission: DesignEditSubmission): Promise<void> {
+function stripPriorDesignEditContext(text: string): string {
+  const idx = text.indexOf(DESIGN_EDIT_PROMPT_HEADER);
+  if (idx < 0) return text;
+  return text.slice(0, idx).trimEnd();
+}
+
+export function submitDesignEditPrompt(submission: DesignEditSubmission): void {
   const { threadRef, prompt } = submission;
   const store = useComposerDraftStore.getState();
   const existingDraft = store.getComposerDraft(threadRef);
-  const existingPrompt = existingDraft?.prompt ?? "";
+  const existingPrompt = stripPriorDesignEditContext(existingDraft?.prompt ?? "");
 
   const contextBlock = buildContextBlock(submission);
   const prefix = existingPrompt.trim().length > 0 ? `${existingPrompt.trim()}\n\n` : "";
@@ -41,7 +47,6 @@ export async function submitDesignEditPrompt(submission: DesignEditSubmission): 
 
   store.setPrompt(threadRef, nextPrompt);
 
-  // Best-effort: focus the composer so the user can review/press Send.
   if (typeof window !== "undefined") {
     window.requestAnimationFrame(() => {
       const composer = document.querySelector<HTMLElement>(
@@ -58,6 +63,20 @@ export async function submitDesignEditPrompt(submission: DesignEditSubmission): 
   }
 }
 
+function safeFence(content: string): string {
+  let maxRun = 2;
+  let run = 0;
+  for (const ch of content) {
+    if (ch === "`") {
+      run += 1;
+      if (run > maxRun) maxRun = run;
+    } else {
+      run = 0;
+    }
+  }
+  return "`".repeat(maxRun + 1);
+}
+
 function buildContextBlock(submission: DesignEditSubmission): string {
   const lines: string[] = [DESIGN_EDIT_PROMPT_HEADER];
   lines.push(`Page: ${submission.pageUrl}`);
@@ -65,10 +84,11 @@ function buildContextBlock(submission: DesignEditSubmission): string {
     lines.push(`Element: <${submission.tagName}>`);
     lines.push(`Selector: ${submission.selector}`);
     if (submission.snippet) {
+      const fence = safeFence(submission.snippet);
       lines.push("Outer HTML:");
-      lines.push("```html");
+      lines.push(`${fence}html`);
       lines.push(submission.snippet);
-      lines.push("```");
+      lines.push(fence);
     }
   } else {
     lines.push(

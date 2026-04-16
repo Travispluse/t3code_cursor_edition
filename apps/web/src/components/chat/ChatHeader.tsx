@@ -70,9 +70,13 @@ export const ChatHeader = memo(function ChatHeader({
   onToggleDiff,
 }: ChatHeaderProps) {
   const rightPanelOpen = useRightPanelStore((state) => state.open);
-  const toggleRightPanel = useRightPanelStore((state) => state.toggleOpen);
   const openRightTab = useRightPanelStore((state) => state.openTab);
   const setRightPanelOpen = useRightPanelStore((state) => state.setOpen);
+  const toggleRightPanel = useRightPanelStore((state) => state.toggleOpen);
+  const isBrowserTabActive = useRightPanelStore(
+    (state) =>
+      state.open && (state.top.activeTab === "browser" || state.bottom.activeTab === "browser"),
+  );
   return (
     <div className="@container/header-actions flex min-w-0 flex-1 items-center gap-2">
       <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden sm:gap-3">
@@ -173,13 +177,13 @@ export const ChatHeader = memo(function ChatHeader({
             render={
               <Toggle
                 className="shrink-0"
-                pressed={rightPanelOpen}
+                pressed={isBrowserTabActive}
                 onPressedChange={() => {
-                  if (!rightPanelOpen) {
+                  if (!rightPanelOpen || !isBrowserTabActive) {
                     setRightPanelOpen(true);
                     openRightTab("browser", { region: "top", activate: true });
                   } else {
-                    toggleRightPanel();
+                    setRightPanelOpen(false);
                   }
                 }}
                 aria-label="Toggle browser panel"
