@@ -99,9 +99,9 @@ const makeCheckpointStore = Effect.gen(function* () {
           ...process.env,
           GIT_INDEX_FILE: tempIndexPath,
           GIT_AUTHOR_NAME: "T4 Code",
-          GIT_AUTHOR_EMAIL: "t3code@users.noreply.github.com",
+          GIT_AUTHOR_EMAIL: "t4code@users.noreply.github.com",
           GIT_COMMITTER_NAME: "T4 Code",
-          GIT_COMMITTER_EMAIL: "t3code@users.noreply.github.com",
+          GIT_COMMITTER_EMAIL: "t4code@users.noreply.github.com",
         };
 
         const headExists = yield* hasHeadCommit(input.cwd);

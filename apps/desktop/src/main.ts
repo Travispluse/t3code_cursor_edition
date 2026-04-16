@@ -105,7 +105,7 @@ const LINUX_DESKTOP_ENTRY_NAME = isDevelopment ? "t4code-dev.desktop" : "t4code.
 const LINUX_WM_CLASS = isDevelopment ? "t4code-dev" : "t4code";
 const USER_DATA_DIR_NAME = isDevelopment ? "t4code-dev" : "t4code";
 // Legacy userData directory names. The first is the original "T3 Code" bundle path (for users
-// upgrading from the T3 Code rebrand); the second is the older lowercase-only t3code name.
+// upgrading from the T3 Code era); the second is the older lowercase-only t3code name.
 const LEGACY_USER_DATA_DIR_NAMES = isDevelopment
   ? ["T3 Code (Dev)", "t3code-dev"]
   : ["T3 Code (Alpha)", "t3code"];
