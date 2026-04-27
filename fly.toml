@@ -1,0 +1,67 @@
+# Fly.io deployment config for the T3 Code server.
+#
+# This runs the server somewhere other than your laptop so coding-agent
+# sessions keep going when you close your computer. See
+# docs/cloud-environments.md for the full walkthrough.
+#
+# Tailor the `app` name and `primary_region` before running `fly launch`.
+# The values below are reasonable defaults.
+#
+#   $ fly launch --no-deploy --copy-config
+#   $ fly volumes create t3code_data --region iad --size 10
+#   $ fly deploy
+#
+# The server listens on port 3773 inside the container. Fly terminates
+# HTTPS/WSS at its edge and forwards plaintext HTTP/WebSocket to that
+# internal port — the `[[services]]` block below wires that up.
+#
+# Persistent state (SQLite, auth bootstrap, worktrees) lives under
+# /data, mounted as the `t3code_data` Fly volume. Without a volume the
+# server would lose all history on restart.
+
+app = "t3code"
+primary_region = "iad"
+
+[build]
+dockerfile = "apps/server/Dockerfile"
+
+[env]
+T3CODE_HOST = "0.0.0.0"
+T3CODE_PORT = "3773"
+T3CODE_BASE_DIR = "/data"
+NODE_ENV = "production"
+
+[[mounts]]
+source = "t3code_data"
+destination = "/data"
+
+[[services]]
+internal_port = 3773
+protocol = "tcp"
+auto_stop_machines = "off" # keep the machine up so sessions survive
+auto_start_machines = true
+min_machines_running = 1
+
+[[services.ports]]
+handlers = ["http"]
+port = 80
+force_https = true
+
+[[services.ports]]
+handlers = ["tls", "http"]
+port = 443
+
+[[services.tcp_checks]]
+interval = "30s"
+timeout = "5s"
+grace_period = "30s"
+
+[services.concurrency]
+type = "connections"
+hard_limit = 200
+soft_limit = 100
+
+[[vm]]
+cpu_kind = "shared"
+cpus = 1
+memory_mb = 1024
